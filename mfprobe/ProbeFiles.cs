@@ -487,17 +487,21 @@ namespace mfprobe
                         // 検索単語の探索
                         if (this._enableProbe == true)
                         {
-                        // プローブ機能が有効の場合、検索単語を探索する
-                        // 検索単語が見つかった場合、結果を表示する
-                        string dispLine = fileName + "," + this._searchWords[i];
-                        Console.WriteLine("{0}", dispLine);
-                        wordFound = true;
+                            // プローブ機能が有効の場合、検索単語を探索する
+                            // 検索単語が見つかった場合、結果を表示する
+                            string dispLine = fileName + "," + this._searchWords[i];
+                            Console.WriteLine("{0}", dispLine);
+
+                            // スレッドセーフなコレクションへの追加
+                            AddToOutputCollection(dispLine);
+
+                            wordFound = true;
+                        }
                     }
                     else
                     {
                         // プローブ機能が無効の場合、検索結果のみ表示する
                         wordFound = true;
-                        }
                     }
                 }
 

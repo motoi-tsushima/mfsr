@@ -1,5 +1,12 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+  </Folder>
+  <Project Path="IntegrationTests/IntegrationTests.csproj" />
+  <Project Path="MF.Shared.Tests/MF.Shared.Tests.csproj" />
   <Project Path="MF.Shared/MF.Shared.csproj" />
+  <Project Path="mfprobe.Tests/mfprobe.Tests.csproj" />
   <Project Path="mfprobe/mfprobe.csproj" />
+  <Project Path="mfsr.Tests/mfsr.Tests.csproj" />
   <Project Path="mfsr/mfsr.csproj" />
 </Solution>
