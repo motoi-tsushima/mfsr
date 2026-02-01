@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace MF.Shared
 {
@@ -27,7 +27,7 @@ namespace MF.Shared
 
             Console.WriteLine("{0}  version {1}  {2}\n", asmName, version, copyright);
             Console.WriteLine("{0} is licensed under MIT License.", asmName);
-            Console.WriteLine("https://github.com/motoi-tsushima/rmsmf");
+            Console.WriteLine("https://github.com/motoi-tsushima/mfsr");
             Console.WriteLine("https://snow-stack.net/ \n");
 
             if (showLicense)

@@ -10,8 +10,8 @@
     
     <!-- バージョン情報 -->
     <Version>1.0.2</Version>
-    <AssemblyVersion>1.0.2.0</AssemblyVersion>
-    <FileVersion>1.0.2.0</FileVersion>
+    <AssemblyVersion>1.0.2.1</AssemblyVersion>
+    <FileVersion>1.0.2.1</FileVersion>
     <Copyright>Copyright © 2026 motoi.tsushima</Copyright>
   </PropertyGroup>
 
