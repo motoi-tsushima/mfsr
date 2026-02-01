@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="MF.Shared/MF.Shared.csproj" />
+  <Project Path="mfprobe/mfprobe.csproj" />
+  <Project Path="mfsr/mfsr.csproj" />
+</Solution>
