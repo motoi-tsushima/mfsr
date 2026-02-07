@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "mfprobe": {
+      "commandName": "Project",
+      "commandLineArgs": "/h:cul"
+    }
+  }
+}
