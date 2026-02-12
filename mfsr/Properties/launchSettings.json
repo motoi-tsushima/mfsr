@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "mfsr": {
+      "commandName": "Project",
+      "commandLineArgs": "dddd* /nl:win"
+    }
+  }
+}

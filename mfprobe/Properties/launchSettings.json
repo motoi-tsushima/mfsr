@@ -2,7 +2,8 @@
   "profiles": {
     "mfprobe": {
       "commandName": "Project",
-      "commandLineArgs": "/h:cul"
+      "commandLineArgs": "t*.txt /nl:win",
+      "workingDirectory": "C:\\_test\\txprobe\\test2"
     }
   }
 }
