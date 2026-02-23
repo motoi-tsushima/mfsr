@@ -44,7 +44,7 @@ namespace MF.Shared
             EncodingInfomation encInfo = new EncodingInfomation();
 
             var result = CharsetDetector.DetectFromBytes(buffer);
-            if (result != null)
+            if (result != null && result.Detected != null)
             {
                 if (result.Detected.Confidence > 0.5)
                 {
