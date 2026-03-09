@@ -2,7 +2,8 @@
   "profiles": {
     "mfsr": {
       "commandName": "Project",
-      "commandLineArgs": "dddd* /nl:win"
+      "commandLineArgs": "nonfile /nl:win",
+      "workingDirectory": "C:\\_test\\txprobe"
     }
   }
 }

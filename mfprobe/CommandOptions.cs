@@ -550,7 +550,7 @@ namespace mfprobe
                     this._files = Directory.GetFileSystemEntries(directoryName, searchWord, searchOption);
                     if (this._files == null || this._files.Length == 0)
                     {
-                        throw new RmsmfException(path + " が存在しないか、検索キーワードとして無効です。");
+                        throw new ArgumentException();
                     }
                 }
                 catch (System.ArgumentException ex)

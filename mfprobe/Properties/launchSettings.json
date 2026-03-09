@@ -2,8 +2,8 @@
   "profiles": {
     "mfprobe": {
       "commandName": "Project",
-      "commandLineArgs": "*.xlsx",
-      "workingDirectory": "C:\\_test\\excel\\xlsx"
+      "commandLineArgs": "nonfile",
+      "workingDirectory": "C:\\_test\\txprobe"
     }
   }
 }
