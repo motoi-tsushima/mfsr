@@ -1,4 +1,4 @@
-# mfsr - Multi-file Search and Replace
+# mfsr - Multi-file String Replace
 
 Fast cross-platform text replacement tool for developers.
 
