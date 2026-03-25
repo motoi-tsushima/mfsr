@@ -7,16 +7,34 @@
     <Nullable>enable</Nullable>
     <PublishAot Condition="'$(RuntimeIdentifier)' == 'win-x64'">true</PublishAot>
     <InvariantGlobalization>false</InvariantGlobalization>
-    
+
     <!-- バージョン情報 -->
     <Version>1.0.3</Version>
     <AssemblyVersion>1.0.3.1</AssemblyVersion>
     <FileVersion>1.0.3.1</FileVersion>
     <Copyright>Copyright © 2026 motoi.tsushima</Copyright>
+
+    <!-- .NET Tool パッケージ設定 -->
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>mfprobe</ToolCommandName>
+    <PackageId>mfprobe</PackageId>
+    <Authors>motoi.tsushima</Authors>
+    <Description>Multi-file probe - Fast cross-platform file search tool for developers. Search text across multiple files with regex support.</Description>
+    <PackageTags>search;grep;file-search;text-search;dotnet-tool;cli</PackageTags>
+    <PackageProjectUrl>https://github.com/motoi-tsushima/mfsr</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/motoi-tsushima/mfsr</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\MF.Shared\MF.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\README-mfprobe.md" Pack="true" PackagePath="README.md" Condition="Exists('..\README-mfprobe.md')" />
   </ItemGroup>
 
 </Project>

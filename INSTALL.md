@@ -1,10 +1,45 @@
 # mfprobe / mfsr - 配布・インストールガイド
 
-## 📥 ダウンロード
+## 🚀 推奨インストール方法（.NET Tool）
+
+**全プラットフォーム対応 - 最も簡単なインストール方法です。**
+
+```bash
+# インストール（Windows / macOS / Linux 共通）
+dotnet tool install -g mfprobe
+dotnet tool install -g mfsr
+
+# アップデート
+dotnet tool update -g mfprobe
+dotnet tool update -g mfsr
+
+# アンインストール
+dotnet tool uninstall -g mfprobe
+dotnet tool uninstall -g mfsr
+```
+
+### 前提条件
+- ✅ **.NET 10 SDK または Runtime** が必要
+  - [公式ダウンロード](https://dotnet.microsoft.com/download/dotnet/10.0)
+
+---
+
+## 📥 その他のインストール方法
+
+### Windows: winget（Native AOT版）
+
+**.NET Runtime 不要**の高速実行ファイルをインストールできます。
+
+```cmd
+winget install motoi.tsushima.mfprobe
+winget install motoi.tsushima.mfsr
+```
+
+### 手動インストール
 
 最新リリースは [Releases](https://github.com/motoi-tsushima/mfsr/releases) からダウンロードできます。
 
-### プラットフォーム別ダウンロード　
+#### プラットフォーム別ダウンロード
 
 | プラットフォーム | ファイル | .NET Runtime | ファイルサイズ |
 |----------------|---------|--------------|---------------|
@@ -12,41 +47,16 @@
 | **macOS Intel/ARM** | `mfprobe-osx-x64-vX.X.X.tar.gz`<br>`mfsr-osx-x64-vX.X.X.tar.gz` | ✅ **必要** | ~500KB |
 | **Linux 64bit** | `mfprobe-linux-x64-vX.X.X.tar.gz`<br>`mfsr-linux-x64-vX.X.X.tar.gz` | ✅ **必要** | ~500KB |
 
----
-
-## 🔧 前提条件
-
-### Windows
-- ✅ **不要**（すべて含まれています）
-
-### macOS / Linux
-- ✅ **.NET 10 Runtime** のインストールが必要です
-  - [公式ダウンロード](https://dotnet.microsoft.com/download/dotnet/10.0)
-
----
-
-## 📦 インストール方法
-
-### Windows
-
-1. ZIPファイルをダウンロード
-2. 任意の場所に展開
-3. `mfprobe.exe` または `mfsr.exe` を実行
+#### Windows（手動インストール）
 
 ```cmd
-mfprobe.exe --version
-mfsr.exe --version
+# 1. ZIPファイルをダウンロードして展開
+# 2. 実行ファイルを実行
+mfprobe.exe -v
+mfsr.exe -v
 ```
 
-#### winget を使用してインストールする場合：
-winget パッケージが提供されている場合は、以下のコマンドでインストールできます。
-この方法なら、ZIPファイルのダウンロードや展開が不要になります。
-```cmd
-winget install motoi.tsushima.mfprobe
-winget install motoi.tsushima.mfsr
-```
-
-### macOS
+#### macOS（手動インストール）
 
 ```bash
 # .NET 10 Runtimeをインストール（初回のみ）
@@ -59,14 +69,14 @@ tar -xzf mfprobe-osx-x64-v1.0.3.tar.gz
 chmod +x mfprobe
 
 # 実行
-./mfprobe --version
+./mfprobe -v
 
 # (オプション) システム全体で使えるようにする
 sudo cp mfprobe /usr/local/bin/
 sudo cp *.dll /usr/local/bin/
 ```
 
-### Linux
+#### Linux（手動インストール）
 
 ```bash
 # .NET 10 Runtimeをインストール（初回のみ）
@@ -80,7 +90,7 @@ tar -xzf mfprobe-linux-x64-v1.0.3.tar.gz
 chmod +x mfprobe
 
 # 実行
-./mfprobe --version
+./mfprobe -v
 
 # (オプション) システム全体で使えるようにする
 sudo cp mfprobe /usr/local/bin/
@@ -91,30 +101,24 @@ sudo cp *.dll /usr/local/bin/
 
 ## 🚀 使用例
 
-### mfprobe（ファイル検索）
+### mfprobe
 
 ```bash
-# カレントディレクトリから検索
-mfprobe -s "検索文字列"
+# ファイル内容を探索
+mfprobe "*.txt"
 
-# 特定のディレクトリを検索
-mfprobe -s "検索文字列" -d /path/to/directory
-
-# ファイル拡張子を指定
-mfprobe -s "検索文字列" -d /path/to/directory -e "*.cs,*.txt"
+# 特定の拡張子のファイルを指定
+mfprobe "*.cs"
 ```
 
-### mfsr（文字列置換）
+### mfsr
 
 ```bash
-# カレントディレクトリで置換
-mfsr -s "検索文字列" -r "置換文字列"
+# ファイルパターンを指定して、文字エンコーディング・BOM・改行コードを変更
+mfsr "*.txt" /w:utf-8 /b:false /nl:unix
 
-# 特定のディレクトリで置換
-mfsr -s "検索文字列" -r "置換文字列" -d /path/to/directory
-
-# 正規表現を使用
-mfsr -s "pattern" -r "replacement" -d /path/to/directory --regex
+# 別の設定例
+mfsr "*.cs" /w:utf-8 /b:true
 ```
 
 ---

@@ -7,16 +7,34 @@
     <Nullable>enable</Nullable>
     <PublishAot Condition="'$(RuntimeIdentifier)' == 'win-x64'">true</PublishAot>
     <InvariantGlobalization>false</InvariantGlobalization>
-    
+
     <!-- バージョン情報 -->
     <Version>1.0.3</Version>
     <AssemblyVersion>1.0.3.1</AssemblyVersion>
     <FileVersion>1.0.3.1</FileVersion>
     <Copyright>Copyright © 2026 motoi.tsushima</Copyright>
+
+    <!-- .NET Tool パッケージ設定 -->
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>mfsr</ToolCommandName>
+    <PackageId>mfsr</PackageId>
+    <Authors>motoi.tsushima</Authors>
+    <Description>Multi-file search and replace - Fast cross-platform text replacement tool for developers. Search and replace text across multiple files with regex support.</Description>
+    <PackageTags>search-replace;replace;text-replace;file-replace;dotnet-tool;cli</PackageTags>
+    <PackageProjectUrl>https://github.com/motoi-tsushima/mfsr</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/motoi-tsushima/mfsr</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\MF.Shared\MF.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\README-mfsr.md" Pack="true" PackagePath="README.md" Condition="Exists('..\README-mfsr.md')" />
   </ItemGroup>
 
 </Project>
