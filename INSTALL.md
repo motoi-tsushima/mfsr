@@ -4,7 +4,7 @@
 
 最新リリースは [Releases](https://github.com/motoi-tsushima/mfsr/releases) からダウンロードできます。
 
-### プラットフォーム別ダウンロード
+### プラットフォーム別ダウンロード　
 
 | プラットフォーム | ファイル | .NET Runtime | ファイルサイズ |
 |----------------|---------|--------------|---------------|
@@ -36,6 +36,14 @@
 ```cmd
 mfprobe.exe --version
 mfsr.exe --version
+```
+
+#### winget を使用してインストールする場合：
+winget パッケージが提供されている場合は、以下のコマンドでインストールできます。
+この方法なら、ZIPファイルのダウンロードや展開が不要になります。
+```cmd
+winget install motoi.tsushima.mfprobe
+winget install motoi.tsushima.mfsr
 ```
 
 ### macOS
