@@ -9,9 +9,9 @@
     <InvariantGlobalization>false</InvariantGlobalization>
 
     <!-- バージョン情報 -->
-    <Version>1.0.3</Version>
-    <AssemblyVersion>1.0.3.1</AssemblyVersion>
-    <FileVersion>1.0.3.1</FileVersion>
+    <Version>1.0.4</Version>
+    <AssemblyVersion>1.0.4.0</AssemblyVersion>
+    <FileVersion>1.0.4.0</FileVersion>
     <Copyright>Copyright © 2026 motoi.tsushima</Copyright>
 
     <!-- .NET Tool パッケージ設定 -->

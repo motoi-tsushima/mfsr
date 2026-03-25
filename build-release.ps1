@@ -2,7 +2,7 @@
 # mfprobe / mfsr リリースビルドスクリプト
 # ===================================================================
 
-$version = "1.0.3"
+$version = "1.0.4"
 
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host " mfprobe / mfsr Release Build v$version" -ForegroundColor Cyan

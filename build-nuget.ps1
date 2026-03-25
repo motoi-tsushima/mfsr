@@ -2,7 +2,7 @@
 # mfprobe / mfsr NuGetパッケージビルドスクリプト
 # ===================================================================
 
-$version = "1.0.3"
+$version = "1.0.4"
 
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host " mfprobe / mfsr NuGet Package Build v$version" -ForegroundColor Cyan
