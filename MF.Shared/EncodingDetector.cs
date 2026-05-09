@@ -10,24 +10,163 @@ using UtfUnknown;
 namespace MF.Shared
 {
     /// <summary>
+    /// 改行コードの種類
+    /// </summary>
+    public enum LineBreakType
+    {
+        /// <summary>改行コードなし</summary>
+        None,
+        /// <summary>CR-LF (Windows)</summary>
+        CrLf,
+        /// <summary>LF (Unix/Mac)</summary>
+        Lf,
+        /// <summary>CR (旧Mac)</summary>
+        Cr,
+        /// <summary>LF と CR-LF の混在</summary>
+        LfAndCrLf,
+        /// <summary>CR と CR-LF の混在</summary>
+        CrAndCrLf,
+        /// <summary>LF と CR の混在</summary>
+        LfAndCr,
+        /// <summary>LF・CR・CR-LF の混在</summary>
+        LfAndCrAndCrLf,
+    }
+
+    /// <summary>
     /// 文字エンコーディング判定情報
     /// </summary>
     public class EncodingInfomation
     {
         /// <summary>コードページ</summary>
         public int CodePage { get; set; }
-        
+
         /// <summary>エンコーディング名</summary>
         public string EncodingName { get; set; }
-        
+
         /// <summary>BOMの有無</summary>
         public bool Bom { get; set; }
-        
+
         /// <summary>エンコーディング</summary>
         public Encoding Encoding { get; set; }
-        
+
         /// <summary>エンコーディングのバリアント（例: HKSCS）</summary>
         public string EncodingVariant { get; set; }
+
+        /// <summary>改行コードの種類</summary>
+        public LineBreakType LineBreak { get; set; } = LineBreakType.None;
+
+        /// <summary>実行中のOSがWindowsかどうか</summary>
+        public bool IsWindowsOs { get; } = OperatingSystem.IsWindows();
+
+        /// <summary>実行中のOSがmacOSかどうか</summary>
+        public bool IsMacOs { get; } = OperatingSystem.IsMacOS();
+
+        /// <summary>実行中のOSがLinuxかどうか</summary>
+        public bool IsLinuxOs { get; } = OperatingSystem.IsLinux();
+
+        /// <summary>
+        /// バイト配列から改行コードの種類を判定してセットする
+        /// </summary>
+        /// <param name="buffer">判定対象のバイト配列</param>
+        public void DetectLineBreak(byte[] buffer)
+        {
+            if (buffer == null || buffer.Length == 0)
+            {
+                LineBreak = LineBreakType.None;
+                return;
+            }
+
+            int countCrLf = 0;
+            int countLf = 0;
+            int countCr = 0;
+
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                if (buffer[i] == 0x0D)
+                {
+                    if (i + 1 < buffer.Length && buffer[i + 1] == 0x0A)
+                    {
+                        countCrLf++;
+                        i++; // 0x0A をスキップ
+                    }
+                    else
+                    {
+                        countCr++;
+                    }
+                }
+                else if (buffer[i] == 0x0A)
+                {
+                    countLf++;
+                }
+            }
+
+            LineBreak = DetermineLineBreakType(countCrLf, countLf, countCr);
+        }
+
+        /// <summary>
+        /// 改行コード出現回数から種類を判定する
+        /// </summary>
+        private static LineBreakType DetermineLineBreakType(int countCrLf, int countLf, int countCr)
+        {
+            if (countLf == 0 && countCr == 0 && countCrLf == 0)
+            {
+                return LineBreakType.None;
+            }
+            else if (countCrLf > 0 && countCrLf == countLf + countCrLf && countCr == 0 && countLf == 0)
+            {
+                return LineBreakType.CrLf;
+            }
+            else if (countCrLf == countLf && countCrLf == countCr)
+            {
+                return LineBreakType.CrLf;
+            }
+            else if (countLf > 0 && countCr == 0 && countCrLf == 0)
+            {
+                return LineBreakType.Lf;
+            }
+            else if (countCr > 0 && countLf == 0 && countCrLf == 0)
+            {
+                return LineBreakType.Cr;
+            }
+            else if (countLf > 0 && countCrLf > 0 && countCr == 0)
+            {
+                return LineBreakType.LfAndCrLf;
+            }
+            else if (countCr > 0 && countCrLf > 0 && countLf == 0)
+            {
+                return LineBreakType.CrAndCrLf;
+            }
+            else if (countCrLf == 0 && countCr > 0 && countLf > 0)
+            {
+                return LineBreakType.LfAndCr;
+            }
+            else
+            {
+                return LineBreakType.LfAndCrAndCrLf;
+            }
+        }
+
+        /// <summary>
+        /// 改行コードの種類を文字列で返す（表示用）
+        /// </summary>
+        public string LineBreakDisplayString
+        {
+            get
+            {
+                return LineBreak switch
+                {
+                    LineBreakType.None          => "No",
+                    LineBreakType.CrLf          => "CR-LF",
+                    LineBreakType.Lf            => "LF",
+                    LineBreakType.Cr            => "CR",
+                    LineBreakType.LfAndCrLf     => "LF & CR-LF",
+                    LineBreakType.CrAndCrLf     => "CR & CR-LF",
+                    LineBreakType.LfAndCr       => "LF & CR",
+                    LineBreakType.LfAndCrAndCrLf => "LF & CR & CR-LF",
+                    _                           => "Unknown",
+                };
+            }
+        }
     }
 
     public static class EncodingDetectorControl
@@ -37,6 +176,7 @@ namespace MF.Shared
             EncodingInfomation encInfo;
             EncodingDetector encDetec = new EncodingDetector(buffer);
             encInfo = encDetec.Detection();
+            encInfo.DetectLineBreak(buffer);
             return encInfo;
         }
         public static EncodingInfomation DetectUtfUnknown(byte[] buffer)
@@ -320,6 +460,7 @@ namespace MF.Shared
                 int readCount = fs.Read(this._buffer, 0, this.BufferSize);
 
                 encInfo = Detection();
+                encInfo.DetectLineBreak(this._buffer);
 
                 //Console.WriteLine("EncodingDetector : Encoding = {0} , Codepage = {1} , BOM = {2}", encInfo.encodingName, encInfo.codePage, encInfo.bom);
             }
@@ -448,13 +589,40 @@ namespace MF.Shared
             else
             {
                 // 中国以外の場合：EUC → CPxxx の順で判定（従来通り）
-                
+
                 // EUC 判定 (EUC-JP/KR/TW)
                 int eucCodePage;
                 outOfSpecification = EUCxx_Detection(out eucCodePage);
 
                 if (outOfSpecification == false)
                 {
+                    // 日本語カルチャーの場合、EUC-JP と Shift-JIS の両方に該当するか確認する
+                    if (eucCodePage == CodePageEucJp && !SJIS_Detection())
+                    {
+                        // 両方に該当 → 改行コードで判定、改行コードがなければOSで判定
+                        encInfo.Bom = false;
+                        // 改行コードを判定（DetectLineBreakはDetection()呼び出し後に外から呼ばれるが、
+                        // ここではバッファから直接判定する）
+                        EncodingInfomation tempInfo = new EncodingInfomation();
+                        tempInfo.DetectLineBreak(this._buffer);
+
+                        bool useShiftJis;
+                        if (tempInfo.LineBreak == LineBreakType.None)
+                        {
+                            // 改行コードなし → OSで判定
+                            useShiftJis = OperatingSystem.IsWindows();
+                        }
+                        else
+                        {
+                            // 改行コードで判定：CR-LF（Windows仕様）ならShift-JIS
+                            useShiftJis = (tempInfo.LineBreak == LineBreakType.CrLf);
+                        }
+
+                        encInfo.CodePage = useShiftJis ? CodePageShiftJis : CodePageEucJp;
+                        encInfo.EncodingName = this.EncodingName(encInfo.CodePage);
+                        return encInfo;
+                    }
+
                     encInfo.CodePage = eucCodePage;
                     encInfo.EncodingName = this.EncodingName(encInfo.CodePage);
                     encInfo.Bom = false;
