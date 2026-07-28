@@ -1,3 +1,4 @@
+/* --- 削除予定 begin ------
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,7 +36,7 @@ namespace MF.Shared
     /// <summary>
     /// 文字エンコーディング判定情報
     /// </summary>
-    public class EncodingInfomation
+    public class EncodingInformation
     {
         /// <summary>コードページ</summary>
         public int CodePage { get; set; }
@@ -171,17 +172,17 @@ namespace MF.Shared
 
     public static class EncodingDetectorControl
     {
-        public static EncodingInfomation DetectEncoding(byte[] buffer)
+        public static EncodingInformation DetectEncoding(byte[] buffer)
         {
-            EncodingInfomation encInfo;
+            EncodingInformation encInfo;
             EncodingDetector encDetec = new EncodingDetector(buffer);
             encInfo = encDetec.Detection();
             encInfo.DetectLineBreak(buffer);
             return encInfo;
         }
-        public static EncodingInfomation DetectUtfUnknown(byte[] buffer)
+        public static EncodingInformation DetectUtfUnknown(byte[] buffer)
         {
-            EncodingInfomation encInfo = new EncodingInfomation();
+            EncodingInformation encInfo = new EncodingInformation();
 
             var result = CharsetDetector.DetectFromBytes(buffer);
             if (result != null && result.Detected != null)
@@ -218,9 +219,9 @@ namespace MF.Shared
             return encInfo;
         }
 
-        public static EncodingInfomation NormalDetectEncoding(byte[] buffer)
+        public static EncodingInformation NormalDetectEncoding(byte[] buffer)
         {
-            EncodingInfomation encInfo;
+            EncodingInformation encInfo;
 
             encInfo = DetectEncoding(buffer);
             if (encInfo.CodePage < 0)
@@ -436,9 +437,9 @@ namespace MF.Shared
         /// </summary>
         /// <param name="fileName">ファイル名</param>
         /// <returns>文字エンコーディング判定情報</returns>
-        public EncodingInfomation Detection(string fileName)
+        public EncodingInformation Detection(string fileName)
         {
-            EncodingInfomation encInfo = null;
+            EncodingInformation encInfo = null;
 
             using (var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read))
             {
@@ -472,10 +473,10 @@ namespace MF.Shared
         /// 判定実行
         /// </summary>
         /// <returns>文字エンコーディング判定情報</returns>
-        public EncodingInfomation Detection()
+        public EncodingInformation Detection()
         {
             bool outOfSpecification;
-            EncodingInfomation encInfo = new EncodingInfomation();
+            EncodingInformation encInfo = new EncodingInformation();
             ByteOrderMarkDetection bomJudg = new ByteOrderMarkDetection();
 
             // BOMチェック
@@ -603,7 +604,7 @@ namespace MF.Shared
                         encInfo.Bom = false;
                         // 改行コードを判定（DetectLineBreakはDetection()呼び出し後に外から呼ばれるが、
                         // ここではバッファから直接判定する）
-                        EncodingInfomation tempInfo = new EncodingInfomation();
+                        EncodingInformation tempInfo = new EncodingInformation();
                         tempInfo.DetectLineBreak(this._buffer);
 
                         bool useShiftJis;
@@ -2070,3 +2071,4 @@ namespace MF.Shared
 
     }
 }
+--- 削除予定 end ----*/

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using MF.Shared;
+using SnowStack.EncodingProbe;
 
 namespace mfprobe
 {
@@ -567,8 +568,7 @@ namespace mfprobe
             if(this.FilesEncoding == null)
             {
                 //ファイル名リストファイルの文字エンコーディングを判定する。
-                EncodingDetector encDetec = new EncodingDetector(0);
-                EncodingInfomation encInfo = encDetec.Detection(this._fileNameListFileName);
+                EncodingInformation encInfo = EncodingProbe.Detect(this._fileNameListFileName);
 
                 if (encInfo.CodePage > 0)
                 {

@@ -7,7 +7,7 @@ using MF.Shared;
 namespace MF.Shared.Tests
 {
     /// <summary>
-    /// EncodingHelper ‚ÌBOM”»’è‹@”\‚ÌƒeƒXƒg
+    /// EncodingHelper ã®BOMåˆ¤å®šæ©Ÿèƒ½ã®ãƒ†ã‚¹ãƒˆ
     /// </summary>
     public class ByteOrderMarkJudgmentTests : IDisposable
     {
@@ -112,7 +112,7 @@ namespace MF.Shared.Tests
                 var result = EncodingHelper.DetectOrUseSpecifiedEncoding(
                     fs, testFile, null, MfCommon.EncodingDetectionType.Normal);
 
-                // Assert - ‹óƒtƒ@ƒCƒ‹‚Å‚à³í‚Éˆ—‚³‚ê‚é
+                // Assert - ç©ºãƒ•ã‚¡ã‚¤ãƒ«ã§ã‚‚æ­£å¸¸ã«å‡¦ç†ã•ã‚Œã‚‹
                 Assert.NotNull(result);
             }
         }

@@ -188,18 +188,19 @@ namespace mfprobe
         {
             string encodingName = "encoding Unknown";
 
+            /* --- 一時的にコメントアウト begin ---
             // エンコーディング情報があれば使用
             if (encodingResult.EncodingInfo != null &&
-                !string.IsNullOrEmpty(encodingResult.EncodingInfo.EncodingName))
+                !string.IsNullOrEmpty(encodingResult.EncodingInfo.EncodingWebName))
             {
-                encodingName = encodingResult.EncodingInfo.EncodingName;
+                encodingName = encodingResult.EncodingInfo.EncodingWebName;
             }
             else if (encodingResult.CodePage > 0)
             {
-                // EncodingDetectionからエンコーディング名を取得
-                EncodingDetector ej = new EncodingDetector(0);
-                encodingName = ej.EncodingName(encodingResult.CodePage);
+                //このルートは現在、あり得ないはずだが、念のためコードページからエンコーディング名を取得
+                encodingName = encodingResult.EncodingInfo.EncodingWebName;
             }
+            -- 一時的にコメントアウト end ---*/
 
             string dispBOM = EncodingHelper.GetBomDisplayString(encodingResult.BomExists);
             string lineBreakType = "EOL Unknown";

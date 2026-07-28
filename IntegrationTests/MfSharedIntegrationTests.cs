@@ -1,4 +1,6 @@
+using System.Globalization;
 using System.Text;
+using System.Threading;
 using Xunit;
 using MF.Shared;
 
@@ -233,6 +235,259 @@ public class MfSharedIntegrationTests : IDisposable
         // Assert
         Assert.True(bomDetector.IsBOM(bytes));
         Assert.True(bytes.Length >= 5); // BOM (3 bytes) + "AB" (2 bytes)
+    }
+
+    /// <summary>
+    /// 韓国語テキスト（CP949）のエンコーディング検出テスト
+    /// </summary>
+    [Fact]
+    public void EncodingDetection_KoreanCP949_DetectsCorrectly()
+    {
+        // Arrange
+        var testFile = Path.Combine(_testDirectory, "korean_cp949.txt");
+        var koreanText = "안녕하세요! 한국어로 작성된 테스트 파일입니다. 이 파일은 CP949 인코딩을 사용합니다.";
+        var cp949 = Encoding.GetEncoding(949); // CP949
+        File.WriteAllText(testFile, koreanText, cp949);
+
+        var originalCulture = Thread.CurrentThread.CurrentCulture;
+        try
+        {
+            // カルチャーを韓国語に設定（アプリで --culture ko-KR を指定した場合と同等）
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("ko-KR");
+
+            // Act
+            using var fs = new FileStream(testFile, FileMode.Open, FileAccess.Read);
+            var result = EncodingHelper.DetectOrUseSpecifiedEncoding(fs, testFile, null, MfCommon.EncodingDetectionType.Normal);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.NotNull(result.Encoding);
+            // CP949 (949) または EUC-KR (51949) として検出されることを確認（両者は基本ハングル範囲で互換）
+            Assert.True(result.CodePage == 949 || result.CodePage == 51949,
+                $"Korean encoding expected (949 or 51949), but was {result.CodePage}");
+            // 検出されたエンコーディングでテキストを正しくデコードできることを確認
+            var bytes = File.ReadAllBytes(testFile);
+            var decoded = result.Encoding.GetString(bytes);
+            Assert.Contains("한국어", decoded);
+        }
+        finally
+        {
+            Thread.CurrentThread.CurrentCulture = originalCulture;
+        }
+    }
+
+    /// <summary>
+    /// 韓国語テキスト（EUC-KR）のエンコーディング検出テスト
+    /// </summary>
+    [Fact]
+    public void EncodingDetection_KoreanEucKR_DetectsCorrectly()
+    {
+        // Arrange
+        var testFile = Path.Combine(_testDirectory, "korean_euckr.txt");
+        var koreanText = "대한민국의 한국어 텍스트입니다. 이 파일은 EUC-KR 인코딩을 사용합니다.";
+        var eucKr = Encoding.GetEncoding(51949); // EUC-KR
+        File.WriteAllText(testFile, koreanText, eucKr);
+
+        var originalCulture = Thread.CurrentThread.CurrentCulture;
+        try
+        {
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("ko-KR");
+
+            // Act
+            using var fs = new FileStream(testFile, FileMode.Open, FileAccess.Read);
+            var result = EncodingHelper.DetectOrUseSpecifiedEncoding(fs, testFile, null, MfCommon.EncodingDetectionType.Normal);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.NotNull(result.Encoding);
+            // CP949 (949) または EUC-KR (51949) として検出されることを確認（基本ハングル範囲では同一バイト列）
+            Assert.True(result.CodePage == 949 || result.CodePage == 51949,
+                $"Korean encoding expected (949 or 51949), but was {result.CodePage}");
+            var bytes = File.ReadAllBytes(testFile);
+            var decoded = result.Encoding.GetString(bytes);
+            Assert.Contains("한국어", decoded);
+        }
+        finally
+        {
+            Thread.CurrentThread.CurrentCulture = originalCulture;
+        }
+    }
+
+    /// <summary>
+    /// 中国語簡体字テキスト（GBK）のエンコーディング検出テスト
+    /// </summary>
+    [Fact]
+    public void EncodingDetection_ChineseSimplifiedGBK_DetectsCorrectly()
+    {
+        // Arrange
+        var testFile = Path.Combine(_testDirectory, "chinese_gbk.txt");
+        var chineseText = "这是一个用简体中文编写的测试文件。这个文件使用GBK编码进行存储。";
+        var gbk = Encoding.GetEncoding(936); // GBK
+        File.WriteAllText(testFile, chineseText, gbk);
+
+        var originalCulture = Thread.CurrentThread.CurrentCulture;
+        try
+        {
+            // カルチャーを中国語（簡体字）に設定
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("zh-CN");
+
+            // Act
+            using var fs = new FileStream(testFile, FileMode.Open, FileAccess.Read);
+            var result = EncodingHelper.DetectOrUseSpecifiedEncoding(fs, testFile, null, MfCommon.EncodingDetectionType.Normal);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.NotNull(result.Encoding);
+            // GBK (936) または GB18030 (54936) として検出されることを確認（GB18030はGBKの上位互換）
+            Assert.True(result.CodePage == 936 || result.CodePage == 54936,
+                $"Simplified Chinese encoding expected (936 or 54936), but was {result.CodePage}");
+            var bytes = File.ReadAllBytes(testFile);
+            var decoded = result.Encoding.GetString(bytes);
+            Assert.Contains("中文", decoded);
+        }
+        finally
+        {
+            Thread.CurrentThread.CurrentCulture = originalCulture;
+        }
+    }
+
+    /// <summary>
+    /// 中国語簡体字テキスト（GB18030）のエンコーディング検出テスト
+    /// </summary>
+    [Fact]
+    public void EncodingDetection_ChineseSimplifiedGB18030_DetectsCorrectly()
+    {
+        // Arrange
+        var testFile = Path.Combine(_testDirectory, "chinese_gb18030.txt");
+        var chineseText = "中华人民共和国。这是一个使用GB18030编码的简体中文测试文件。";
+        var gb18030 = Encoding.GetEncoding(54936); // GB18030
+        File.WriteAllText(testFile, chineseText, gb18030);
+
+        var originalCulture = Thread.CurrentThread.CurrentCulture;
+        try
+        {
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("zh-CN");
+
+            // Act
+            using var fs = new FileStream(testFile, FileMode.Open, FileAccess.Read);
+            var result = EncodingHelper.DetectOrUseSpecifiedEncoding(fs, testFile, null, MfCommon.EncodingDetectionType.Normal);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.NotNull(result.Encoding);
+            // GBK (936) または GB18030 (54936) として検出されることを確認
+            Assert.True(result.CodePage == 936 || result.CodePage == 54936,
+                $"Simplified Chinese encoding expected (936 or 54936), but was {result.CodePage}");
+            var bytes = File.ReadAllBytes(testFile);
+            var decoded = result.Encoding.GetString(bytes);
+            Assert.Contains("中文", decoded);
+        }
+        finally
+        {
+            Thread.CurrentThread.CurrentCulture = originalCulture;
+        }
+    }
+
+    /// <summary>
+    /// 中国語繁体字テキスト（Big5）のエンコーディング検出テスト（台湾・香港）
+    /// </summary>
+    [Fact]
+    public void EncodingDetection_ChineseTraditionalBig5_DetectsCorrectly()
+    {
+        // Arrange
+        var testFile = Path.Combine(_testDirectory, "chinese_big5.txt");
+        var chineseText = "這是一個用繁體中文編寫的測試檔案。此檔案使用Big5編碼進行儲存。";
+        var big5 = Encoding.GetEncoding(950); // Big5
+        File.WriteAllText(testFile, chineseText, big5);
+
+        var originalCulture = Thread.CurrentThread.CurrentCulture;
+        try
+        {
+            // カルチャーを中国語（繁体字・台湾）に設定
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("zh-TW");
+
+            // Act
+            using var fs = new FileStream(testFile, FileMode.Open, FileAccess.Read);
+            var result = EncodingHelper.DetectOrUseSpecifiedEncoding(fs, testFile, null, MfCommon.EncodingDetectionType.Normal);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.NotNull(result.Encoding);
+            Assert.Equal(950, result.CodePage); // Big5 (950)
+            var bytes = File.ReadAllBytes(testFile);
+            var decoded = result.Encoding.GetString(bytes);
+            Assert.Contains("繁體中文", decoded);
+        }
+        finally
+        {
+            Thread.CurrentThread.CurrentCulture = originalCulture;
+        }
+    }
+
+    /// <summary>
+    /// EUC-TW（台湾繁体字）のエンコーディング検出テスト
+    /// EUC-TW (CodePage 51950) は .NET でサポートされていないため、
+    /// EncodingProbe が 51950 を返した場合は Encoding == null になる
+    /// </summary>
+    [Fact]
+    public void EncodingDetection_EucTW_CodePageDetected_EncodingIsNull()
+    {
+        // Arrange
+        // EUC-TW のバイト列: CNS 11643 Plane 1 の文字を EUC-TW 形式でエンコード
+        // EUC-TW の2バイト文字は両バイトとも 0xA1-0xFE の範囲
+        // 以下は「中文測試」に相当する EUC-TW バイト列
+        var eucTwBytes = new byte[]
+        {
+            // 中: CNS11643-1 → EUC-TW: 0xA4 0xE2
+            0xA4, 0xE2,
+            // 文: CNS11643-1 → EUC-TW: 0xA4, 0xE5
+            0xA4, 0xE5,
+            // 測: CNS11643-1 → EUC-TW: 0xB4, 0xFA
+            0xB4, 0xFA,
+            // 試: CNS11643-1 → EUC-TW: 0xB8, 0xD5
+            0xB8, 0xD5,
+            // 台: CNS11643-1 → EUC-TW: 0xA5, 0xD8
+            0xA5, 0xD8,
+            // 灣: CNS11643-1 → EUC-TW: 0xC6, 0xE3
+            0xC6, 0xE3,
+            // 繁: CNS11643-1 → EUC-TW: 0xC1, 0xFA
+            0xC1, 0xFA,
+            // 體: CNS11643-1 → EUC-TW: 0xC5, 0xD7
+            0xC5, 0xD7,
+        };
+        var testFile = Path.Combine(_testDirectory, "euctw_test.txt");
+        File.WriteAllBytes(testFile, eucTwBytes);
+
+        var originalCulture = Thread.CurrentThread.CurrentCulture;
+        try
+        {
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("zh-TW");
+
+            // Act
+            using var fs = new FileStream(testFile, FileMode.Open, FileAccess.Read);
+            var result = EncodingHelper.DetectOrUseSpecifiedEncoding(fs, testFile, null, MfCommon.EncodingDetectionType.Normal);
+
+            // Assert
+            Assert.NotNull(result);
+            // EncodingProbe が EUC-TW (51950) と判定した場合、.NET 非サポートのため Encoding == null
+            // Big5 (950) と判定した場合は Encoding != null
+            if (result.CodePage == 51950)
+            {
+                // EUC-TW は .NET でサポートされていないため Encoding が null になることを確認
+                Assert.Null(result.Encoding);
+                Assert.NotNull(result.EncodingInfo);
+            }
+            else
+            {
+                // Big5 などの類似エンコーディングとして検出された場合
+                Assert.True(result.CodePage == 950 || result.CodePage == 65001,
+                    $"Expected EUC-TW (51950) or compatible encoding (950), but was {result.CodePage}");
+            }
+        }
+        finally
+        {
+            Thread.CurrentThread.CurrentCulture = originalCulture;
+        }
     }
 
     [Fact]

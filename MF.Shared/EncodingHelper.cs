@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
+using SnowStack.EncodingProbe;
 
 namespace MF.Shared
 {
@@ -19,7 +20,7 @@ namespace MF.Shared
         public int CodePage { get; set; }
 
         /// <summary>エンコーディング判定情報</summary>
-        public EncodingInfomation EncodingInfo { get; set; }
+        public EncodingInformation EncodingInfo { get; set; }
     }
 
     /// <summary>
@@ -84,6 +85,7 @@ namespace MF.Shared
             // ファイルポジションを先頭に戻す（StreamReaderが正しく読めるようにする）
             fs.Position = 0;
 
+            /* --- 削除予定 begin ----
             ByteOrderMarkDetection bomJudg = new ByteOrderMarkDetection();
 
             if (bomJudg.IsBOM(buffer))
@@ -91,7 +93,7 @@ namespace MF.Shared
                 // BOMあり
                 result.BomExists = true;
                 result.CodePage = bomJudg.CodePage;
-                result.EncodingInfo = new EncodingInfomation
+                result.EncodingInfo = new EncodingInformation
                 {
                     CodePage = result.CodePage,
                     Bom = true
@@ -104,6 +106,11 @@ namespace MF.Shared
                 result.EncodingInfo = DetectEncodingByMode(buffer, detectionMode);
                 result.CodePage = result.EncodingInfo.CodePage;
             }
+            --- 削除予定 end ---- */
+            var encodingInfomation = EncodingProbe.Detect(buffer);
+            result.BomExists = encodingInfomation.Bom;
+            result.CodePage = encodingInfomation.CodePage;
+            result.EncodingInfo = encodingInfomation;
 
             // エンコーディングオブジェクトの作成
             result.Encoding = CreateEncodingFromCodePage(result.CodePage, fileName);
@@ -140,21 +147,24 @@ namespace MF.Shared
                 result.CodePage = specifiedEncoding.CodePage;
             }
 
+            /* ------- 削除予定 begin ----
             // エンコーディング指定がある場合も簡略的なencInfoを作成
-            result.EncodingInfo = new EncodingInfomation
+            result.EncodingInfo = new EncodingInformation
             {
                 CodePage = result.CodePage,
                 Bom = result.BomExists
             };
+            ---- 削除予定 end ---- */
         }
 
         /// <summary>
         /// 判定モードに応じてエンコーディングを判定
         /// </summary>
-        private static EncodingInfomation DetectEncodingByMode(
+        private static EncodingInformation DetectEncodingByMode(
             byte[] buffer,
             MfCommon.EncodingDetectionType detectionMode)
         {
+            /* --- 削除予定 begin ----
             switch (detectionMode)
             {
                 case MfCommon.EncodingDetectionType.FirstParty:
@@ -167,6 +177,20 @@ namespace MF.Shared
                 default:
                     return EncodingDetectorControl.NormalDetectEncoding(buffer);
             }
+            --- 削除予定 end ---- */
+            switch (detectionMode)
+            {
+                case MfCommon.EncodingDetectionType.FirstParty:
+                    return EncodingProbe.Detect(buffer,new EncodingDetectorOptions { Strategy = DetectionStrategy.NativeOnly });
+
+                case MfCommon.EncodingDetectionType.ThirdParty:
+                    return EncodingProbe.Detect(buffer,new EncodingDetectorOptions { Strategy = DetectionStrategy.UtfUnknownOnly });
+
+                case MfCommon.EncodingDetectionType.Normal:
+                default:
+                    return EncodingProbe.Detect(buffer,new EncodingDetectorOptions { Strategy = DetectionStrategy.Combined });
+            }
+
         }
 
         /// <summary>
@@ -197,30 +221,32 @@ namespace MF.Shared
             }
         }
 
-        /// <summary>
-        /// エンコーディング名を取得（表示用）
-        /// </summary>
-        public static string GetEncodingName(Encoding encoding, EncodingInfomation encInfo)
+        /* --- 一時退避 begin ----
+    /// <summary>
+    /// エンコーディング名を取得（表示用）
+    /// </summary>
+    public static string GetEncodingName(Encoding encoding, EncodingInformation encInfo)
+    {
+        if (encoding == null)
         {
-            if (encoding == null)
-            {
-                return "encoding Unknown";
-            }
-
-            // encInfo.EncodingNameが設定されている場合はそれを優先使用
-            if (encInfo != null && !string.IsNullOrEmpty(encInfo.EncodingName))
-            {
-                return encInfo.EncodingName;
-            }
-
-            // EncodingVariantが設定されている場合はそれを使用
-            if (encInfo != null && !string.IsNullOrEmpty(encInfo.EncodingVariant))
-            {
-                return encInfo.EncodingVariant;
-            }
-
-            return encoding.WebName;
+            return "encoding Unknown";
         }
+
+        // encInfo.EncodingNameが設定されている場合はそれを優先使用
+        if (encInfo != null && !string.IsNullOrEmpty(encInfo.EncodingWebName))
+        {
+            return encInfo.EncodingWebName;
+        }
+
+        // EncodingVariantが設定されている場合はそれを使用
+        if (encInfo != null && !string.IsNullOrEmpty(encInfo.EncodingVariant))
+        {
+            return encInfo.EncodingVariant;
+        }
+
+        return encoding.WebName;
+    }
+        --- 一時退避 end ----*/
 
         /// <summary>
         /// BOM表示文字列を取得
@@ -245,11 +271,41 @@ namespace MF.Shared
             // コードページからエンコーディング名を取得を試みる
             if (codePage > 0)
             {
-                EncodingDetector ej = new EncodingDetector(0);
-                encodingName = ej.EncodingName(codePage);
+                encodingName = GetEncodingWebName(codePage);
             }
 
             return $"{fileName}\t,{encodingName}\t,{lineBreakType}\t,{dispBOM}";
         }
+
+        /// <summary>
+        /// コードページからエンコーディング名を取得する
+        /// </summary>
+        /// <param name="codePage">コードページ</param>
+        /// <returns>エンコーディング名</returns>
+        private static string GetEncodingWebName(int codePage) =>
+            codePage switch
+            {
+                20127 => "us-ascii",
+                50220 => "iso-2022-jp",
+                50225 => "iso-2022-kr",
+                50227 => "x-cp50227",
+                50229 => "iso-2022-tw",
+                65001 => "utf-8",
+                20932 => "euc-jp",
+                51936 => "euc-cn",
+                51949 => "euc-kr",
+                51950 => "euc-tw",
+                932 => "shift_jis",
+                949 => "cp949",
+                936 => "gbk",
+                54936 => "gb18030",
+                950 => "big5",
+                1200 => "utf-16",
+                1201 => "unicodeFFFE",
+                12000 => "utf-32",
+                12001 => "utf-32BE",
+                _ => "I do not know.",
+            };
+
     }
 }

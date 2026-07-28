@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using SnowStack.EncodingProbe;
 
 namespace MF.Shared
 {
@@ -144,8 +145,7 @@ namespace MF.Shared
         {
             if (encoding == null)
             {
-                EncodingDetector encDetec = new EncodingDetector(0);
-                EncodingInfomation encInfo = encDetec.Detection(fileName);
+                EncodingInformation encInfo = EncodingProbe.Detect(fileName);
 
                 if (encInfo.CodePage > 0)
                 {
