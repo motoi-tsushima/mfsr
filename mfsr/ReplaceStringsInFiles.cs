@@ -40,6 +40,19 @@ namespace mfsr
         }
 
         /// <summary>
+        /// 文字エンコーディング自動判定に使用するカルチャー情報
+        /// </summary>
+        private string _cultureInfo = null;
+        /// <summary>
+        /// 文字エンコーディング自動判定に使用するカルチャー情報
+        /// </summary>
+        public string CultureInfo
+        {
+            get { return _cultureInfo; }
+            set { this._cultureInfo = value; }
+        }
+
+        /// <summary>
         /// コンストラクタ
         /// </summary>
         /// <param name="replaceWords">置換単語テーブル</param>
@@ -144,7 +157,7 @@ namespace mfsr
             using (FileStream fs = new FileStream(fileName, readOptions))
             {
                 var encodingResult = EncodingHelper.DetectOrUseSpecifiedEncoding(
-                    fs, fileName, encoding, this._encodingDetectionMode);
+                    fs, fileName, encoding, this._encodingDetectionMode, this._cultureInfo);
 
                 if (encodingResult.Encoding == null)
                 {

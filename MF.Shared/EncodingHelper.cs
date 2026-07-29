@@ -36,12 +36,14 @@ namespace MF.Shared
         /// <param name="fileName">ファイル名（エラーメッセージ用）</param>
         /// <param name="specifiedEncoding">指定されたエンコーディング（nullの場合は自動判定）</param>
         /// <param name="detectionMode">自動判定モード</param>
+        /// <param name="culture">自動判定に使用するカルチャー名（例: "ja-JP"）。null の場合は現在のカルチャーを使用する。</param>
         /// <returns>エンコーディング判定結果</returns>
         public static EncodingDetectionResult DetectOrUseSpecifiedEncoding(
             FileStream fs,
             string fileName,
             Encoding specifiedEncoding,
-            MfCommon.EncodingDetectionType detectionMode)
+            MfCommon.EncodingDetectionType detectionMode,
+            string culture = null)
         {
             var result = new EncodingDetectionResult();
 
@@ -49,7 +51,7 @@ namespace MF.Shared
             if (specifiedEncoding == null)
             {
                 // エンコーディング指定が無い場合：自動判定
-                DetectEncodingFromFile(fs, fileName, detectionMode, result);
+                DetectEncodingFromFile(fs, fileName, detectionMode, culture, result);
             }
             else
             {
@@ -67,6 +69,7 @@ namespace MF.Shared
             FileStream fs,
             string fileName,
             MfCommon.EncodingDetectionType detectionMode,
+            string culture,
             EncodingDetectionResult result)
         {
             // 読み取りファイルの文字エンコーディングを判定する
@@ -85,29 +88,11 @@ namespace MF.Shared
             // ファイルポジションを先頭に戻す（StreamReaderが正しく読めるようにする）
             fs.Position = 0;
 
-            /* --- 削除予定 begin ----
-            ByteOrderMarkDetection bomJudg = new ByteOrderMarkDetection();
-
-            if (bomJudg.IsBOM(buffer))
+            var encodingInfomation = EncodingProbe.Detect(buffer, new EncodingDetectorOptions
             {
-                // BOMあり
-                result.BomExists = true;
-                result.CodePage = bomJudg.CodePage;
-                result.EncodingInfo = new EncodingInformation
-                {
-                    CodePage = result.CodePage,
-                    Bom = true
-                };
-            }
-            else
-            {
-                // BOMなし：判定モードに応じてエンコーディングを判定
-                result.BomExists = false;
-                result.EncodingInfo = DetectEncodingByMode(buffer, detectionMode);
-                result.CodePage = result.EncodingInfo.CodePage;
-            }
-            --- 削除予定 end ---- */
-            var encodingInfomation = EncodingProbe.Detect(buffer);
+                Strategy = MfCommon.ToDetectionStrategy(detectionMode),
+                Culture = culture
+            });
             result.BomExists = encodingInfomation.Bom;
             result.CodePage = encodingInfomation.CodePage;
             result.EncodingInfo = encodingInfomation;
@@ -146,51 +131,6 @@ namespace MF.Shared
                 result.BomExists = false;
                 result.CodePage = specifiedEncoding.CodePage;
             }
-
-            /* ------- 削除予定 begin ----
-            // エンコーディング指定がある場合も簡略的なencInfoを作成
-            result.EncodingInfo = new EncodingInformation
-            {
-                CodePage = result.CodePage,
-                Bom = result.BomExists
-            };
-            ---- 削除予定 end ---- */
-        }
-
-        /// <summary>
-        /// 判定モードに応じてエンコーディングを判定
-        /// </summary>
-        private static EncodingInformation DetectEncodingByMode(
-            byte[] buffer,
-            MfCommon.EncodingDetectionType detectionMode)
-        {
-            /* --- 削除予定 begin ----
-            switch (detectionMode)
-            {
-                case MfCommon.EncodingDetectionType.FirstParty:
-                    return EncodingDetectorControl.DetectEncoding(buffer);
-
-                case MfCommon.EncodingDetectionType.ThirdParty:
-                    return EncodingDetectorControl.DetectUtfUnknown(buffer);
-
-                case MfCommon.EncodingDetectionType.Normal:
-                default:
-                    return EncodingDetectorControl.NormalDetectEncoding(buffer);
-            }
-            --- 削除予定 end ---- */
-            switch (detectionMode)
-            {
-                case MfCommon.EncodingDetectionType.FirstParty:
-                    return EncodingProbe.Detect(buffer,new EncodingDetectorOptions { Strategy = DetectionStrategy.NativeOnly });
-
-                case MfCommon.EncodingDetectionType.ThirdParty:
-                    return EncodingProbe.Detect(buffer,new EncodingDetectorOptions { Strategy = DetectionStrategy.UtfUnknownOnly });
-
-                case MfCommon.EncodingDetectionType.Normal:
-                default:
-                    return EncodingProbe.Detect(buffer,new EncodingDetectorOptions { Strategy = DetectionStrategy.Combined });
-            }
-
         }
 
         /// <summary>
@@ -220,33 +160,6 @@ namespace MF.Shared
                 return null;
             }
         }
-
-        /* --- 一時退避 begin ----
-    /// <summary>
-    /// エンコーディング名を取得（表示用）
-    /// </summary>
-    public static string GetEncodingName(Encoding encoding, EncodingInformation encInfo)
-    {
-        if (encoding == null)
-        {
-            return "encoding Unknown";
-        }
-
-        // encInfo.EncodingNameが設定されている場合はそれを優先使用
-        if (encInfo != null && !string.IsNullOrEmpty(encInfo.EncodingWebName))
-        {
-            return encInfo.EncodingWebName;
-        }
-
-        // EncodingVariantが設定されている場合はそれを使用
-        if (encInfo != null && !string.IsNullOrEmpty(encInfo.EncodingVariant))
-        {
-            return encInfo.EncodingVariant;
-        }
-
-        return encoding.WebName;
-    }
-        --- 一時退避 end ----*/
 
         /// <summary>
         /// BOM表示文字列を取得

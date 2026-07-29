@@ -71,6 +71,7 @@ namespace mfprobe
                     commandOptions.SearchWords, commandOptions.Files,
                     commandOptions.EnableProbe, commandOptions.OutputFileNameListFileName,
                     commandOptions.FilesEncoding);
+                probe.CultureInfo = commandOptions.CultureInfo;
 
                 probe.Probe(commandOptions.ReadEncoding);
 

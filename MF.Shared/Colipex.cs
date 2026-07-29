@@ -141,11 +141,21 @@ namespace MF.Shared
         /// </summary>
         /// <param name="encoding">エンコーディング（参照渡し）</param>
         /// <param name="fileName">判定対象のファイル名</param>
-        protected void EnsureEncodingInitialized(ref Encoding encoding, string fileName)
+        /// <param name="culture">判定に使用するカルチャー名（null=指定なし）</param>
+        /// <param name="detectionMode">自動判定モード</param>
+        protected void EnsureEncodingInitialized(
+            ref Encoding encoding,
+            string fileName,
+            string culture = null,
+            MfCommon.EncodingDetectionType detectionMode = MfCommon.EncodingDetectionType.Normal)
         {
             if (encoding == null)
             {
-                EncodingInformation encInfo = EncodingProbe.Detect(fileName);
+                EncodingInformation encInfo = EncodingProbe.Detect(fileName, new EncodingDetectorOptions
+                {
+                    Strategy = MfCommon.ToDetectionStrategy(detectionMode),
+                    Culture = culture
+                });
 
                 if (encInfo.CodePage > 0)
                 {

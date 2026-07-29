@@ -439,8 +439,10 @@ namespace mfprobe
 
             // エンコーディングの判定と設定
             EnsureEncodingInitialized(
-                ref this._replaceEncoding, 
-                this._searchWordsFileName);
+                ref this._replaceEncoding,
+                this._searchWordsFileName,
+                this._cultureInfo,
+                this._encodingDetectionMode);
 
             // ファイルから行を読み込み
             List<string> lines = LoadSearchWordsFromFile();
@@ -568,7 +570,11 @@ namespace mfprobe
             if(this.FilesEncoding == null)
             {
                 //ファイル名リストファイルの文字エンコーディングを判定する。
-                EncodingInformation encInfo = EncodingProbe.Detect(this._fileNameListFileName);
+                EncodingInformation encInfo = EncodingProbe.Detect(this._fileNameListFileName, new EncodingDetectorOptions
+                {
+                    Strategy = MfCommon.ToDetectionStrategy(this._encodingDetectionMode),
+                    Culture = this._cultureInfo
+                });
 
                 if (encInfo.CodePage > 0)
                 {

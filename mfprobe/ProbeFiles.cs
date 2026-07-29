@@ -51,6 +51,19 @@ namespace mfprobe
         }
 
         /// <summary>
+        /// 文字エンコーディング自動判定に使用するカルチャー情報
+        /// </summary>
+        private string _cultureInfo = null;
+        /// <summary>
+        /// 文字エンコーディング自動判定に使用するカルチャー情報
+        /// </summary>
+        public string CultureInfo
+        {
+            get { return _cultureInfo; }
+            set { this._cultureInfo = value; }
+        }
+
+        /// <summary>
         /// 出力データコレクション（マルチスレッド対応）
         /// </summary>
         private ConcurrentBag<string> _outputCollection = null;
@@ -160,8 +173,9 @@ namespace mfprobe
             {
                 // エンコーディングを判定または取得
                 var encodingResult = EncodingHelper.DetectOrUseSpecifiedEncoding(
-                    fs, fileName, encoding, 
-                    (MfCommon.EncodingDetectionType)this._encodingDetectionMode);
+                    fs, fileName, encoding,
+                    (MfCommon.EncodingDetectionType)this._encodingDetectionMode,
+                    this._cultureInfo);
 
                 if (encodingResult.Encoding == null)
                 {
