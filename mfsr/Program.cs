@@ -76,6 +76,7 @@ namespace mfsr
                 // ファイルの文字列置換処理の実行
                 ReplaceStringsInFiles replace = new ReplaceStringsInFiles(commandOptions.ReplaceWords, commandOptions.Files, commandOptions.EnableBOM);
                 replace.CultureInfo = commandOptions.CultureInfo;
+                replace.EncodingDetectionMode = commandOptions.EncodingDetectionMode;
 
                 replace.Replace(commandOptions.ReadEncoding, commandOptions.WriteEncoding, commandOptions.WriteNewLine);
 
