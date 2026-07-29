@@ -24,18 +24,18 @@ namespace mfsr
         /// <param name="args"></param>
         public CommandOptions(string[] args) : base(args)
         {
-            // 最初にカルチャー情報を設定（ヘルプやバージョン表示に反映させるため）
+            // 最初にカルチャー情報を設定（ヘルプやバージョン表示のメッセージ言語に反映させるため）
+            // 文字エンコーディング判定用のカルチャーは EncodingProbe.Detect の引数として個別に渡すため、
+            // ここでは表示メッセージの言語選択に使う UI カルチャーのみを設定する。
             this._cultureInfo = ParseCultureInfoOption();
             if (!string.IsNullOrEmpty(this._cultureInfo))
             {
                 try
                 {
                     var culture = new System.Globalization.CultureInfo(this._cultureInfo);
-                    // Native AOT 対応: CurrentCulture と CurrentUICulture の両方を設定
-                    System.Threading.Thread.CurrentThread.CurrentCulture = culture;
+                    // Native AOT 対応: CurrentUICulture を設定
                     System.Threading.Thread.CurrentThread.CurrentUICulture = culture;
                     // アプリケーション全体のデフォルトカルチャーも設定
-                    System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
                     System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
                 }
                 catch (System.Globalization.CultureNotFoundException ex)

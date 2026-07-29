@@ -2,8 +2,8 @@
   "profiles": {
     "mfprobe": {
       "commandName": "Project",
-      "commandLineArgs": "nonfile",
-      "workingDirectory": "C:\\_test\\txprobe"
+      "commandLineArgs": "*.txt /cul:ko",
+      "workingDirectory": "C:\\_test\\txprobe\\test_ko\\cp949"
     }
   }
 }
