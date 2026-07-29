@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MF.Shared;
+using SnowStack.EncodingProbe;
 
 namespace mfprobe
 {
@@ -467,16 +468,18 @@ namespace mfprobe
         /// <param name="reader">読み取りファイルストリーム</param>
         /// <param name="encoding">読み取りファイルの文字エンコーディング</param>
         /// <param name="bomExist">読み取りファイルのBOM有無フラグ</param>
-        /// <param name="encInfo">エンコーディング判定情報（未使用：互換性のため残す）</param>
+        /// <param name="encInfo">エンコーディング判定情報（/c で明示指定された場合は null）</param>
         /// <returns>正常終了=true</returns>
-        public bool ReadForSearch(string fileName, StreamReader reader, Encoding encoding, bool bomExist, object encInfo = null)
+        public bool ReadForSearch(string fileName, StreamReader reader, Encoding encoding, bool bomExist, EncodingInformation encInfo = null)
         {
             bool rc = true;
 
-            // EncodingHelperを使用してBOMと名前を取得
+            // EncodingHelperを使用してBOMを取得
             string dispBOM = EncodingHelper.GetBomDisplayString(bomExist);
-            // encInfoの型が異なるアセンブリのため、encodingのみから名前を取得
-            string encodingName = encoding != null ? encoding.WebName : "encoding Unknown";
+            // 判定結果のフレンドリ名(EncodingWebName)を優先し、無ければ.NETのEncoding名にフォールバックする
+            string encodingName = !string.IsNullOrEmpty(encInfo?.EncodingWebName)
+                ? encInfo.EncodingWebName
+                : (encoding != null ? encoding.WebName : "encoding Unknown");
 
             // 読み取りファイルを全て読み込む
             string readLine = reader.ReadToEnd();
