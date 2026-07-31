@@ -203,20 +203,6 @@ namespace mfprobe
         {
             string encodingName = "encoding Unknown";
 
-            /* --- 一時的にコメントアウト begin ---
-            // エンコーディング情報があれば使用
-            if (encodingResult.EncodingInfo != null &&
-                !string.IsNullOrEmpty(encodingResult.EncodingInfo.EncodingWebName))
-            {
-                encodingName = encodingResult.EncodingInfo.EncodingWebName;
-            }
-            else if (encodingResult.CodePage > 0)
-            {
-                //このルートは現在、あり得ないはずだが、念のためコードページからエンコーディング名を取得
-                encodingName = encodingResult.EncodingInfo.EncodingWebName;
-            }
-            -- 一時的にコメントアウト end ---*/
-
             string dispBOM = EncodingHelper.GetBomDisplayString(encodingResult.BomExists);
             string lineBreakType = "EOL Unknown";
             string dispLine = fileName + "\t," + encodingName + "\t," + lineBreakType + "\t," + dispBOM;
@@ -388,76 +374,30 @@ namespace mfprobe
         }
 
         /// <summary>
-        /// 文字列内の指定された部分文字列の出現回数をカウントする
+        /// SnowStack.EncodingProbe の LineBreakType を表示用文字列に変換する
         /// </summary>
-        /// <param name="text">検索対象の文字列</param>
-        /// <param name="searchString">検索する部分文字列</param>
-        /// <returns>出現回数</returns>
-        private int CountSubstring(string text, string searchString)
-        {
-            int count = 0;
-            int index = 0;
-            int searchLength = searchString.Length;
-
-            do
-            {
-                if (text.Length - index < searchLength)
-                {
-                    break;
-                }
-
-                index = text.IndexOf(searchString, index, text.Length - index);
-                if (index >= 0)
-                {
-                    count++;
-                    index += searchLength;
-                }
-
-            } while (index >= 0);
-
-            return count;
-        }
-
-        /// <summary>
-        /// 改行コードの種類を判定する
-        /// </summary>
-        /// <param name="countCRLF">CR-LFの出現回数</param>
-        /// <param name="countLF">LFの出現回数</param>
-        /// <param name="countCR">CRの出現回数</param>
+        /// <param name="lineBreak">改行コードの種類</param>
         /// <returns>改行コードの種類を示す文字列</returns>
-        private string DetermineLineBreakType(int countCRLF, int countLF, int countCR)
+        private static string MapLineBreakType(LineBreakType lineBreak)
         {
-            if (countLF == 0 && countCR == 0 && countCRLF == 0)
+            switch (lineBreak)
             {
-                return "No";
-            }
-            else if (countCRLF == countLF && countCRLF == countCR)
-            {
-                return "CR-LF";
-            }
-            else if (countLF > 0 && countCR == 0 && countCRLF == 0)
-            {
-                return "LF";
-            }
-            else if (countCR > 0 && countLF == 0 && countCRLF == 0)
-            {
-                return "CR";
-            }
-            else if (countLF > 0 && countCRLF > 0 && countLF != countCRLF && countCR == 0)
-            {
-                return "LF & CR-LF";
-            }
-            else if (countCR > 0 && countCRLF > 0 && countCR != countCRLF && countLF == 0)
-            {
-                return "CR & CR-LF";
-            }
-            else if (countCRLF == 0 && countCR > 0 && countLF > 0)
-            {
-                return "LF & CR";
-            }
-            else
-            {
-                return "LF & CR & CR-LF";
+                case LineBreakType.None:
+                    return "No";
+                case LineBreakType.CrLf:
+                    return "CR-LF";
+                case LineBreakType.Lf:
+                    return "LF";
+                case LineBreakType.Cr:
+                    return "CR";
+                case LineBreakType.LfAndCrLf:
+                    return "LF & CR-LF";
+                case LineBreakType.CrAndCrLf:
+                    return "CR & CR-LF";
+                case LineBreakType.LfAndCr:
+                    return "LF & CR";
+                default:
+                    return "LF & CR & CR-LF";
             }
         }
 
@@ -484,13 +424,14 @@ namespace mfprobe
             // 読み取りファイルを全て読み込む
             string readLine = reader.ReadToEnd();
 
-            // 改行コードのカウント
-            int countCRLF = CountSubstring(readLine, "\r\n");
-            int countLF = CountSubstring(readLine, "\n");
-            int countCR = CountSubstring(readLine, "\r");
-
             // 改行コードの種類を判定
-            string lineBreakType = DetermineLineBreakType(countCRLF, countLF, countCR);
+            // 自動判定時は SnowStack.EncodingProbe の判定結果(encInfo.LineBreak)をそのまま使用する。
+            // /c 等でエンコーディングが明示指定された場合は encInfo が null になるため、
+            // SnowStack.EncodingProbe.EncodingDetector.DetectLineBreak() で改めて判定する。
+            LineBreakType lineBreak = encInfo != null
+                ? encInfo.LineBreak
+                : new EncodingDetector(Encoding.UTF8.GetBytes(readLine)).DetectLineBreak();
+            string lineBreakType = MapLineBreakType(lineBreak);
 
             if (this._searchWords != null)
             {
