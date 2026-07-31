@@ -485,6 +485,8 @@ namespace mfprobe
 
         /// <summary>
         /// 読み込んだ行をパースして検索単語テーブルに格納
+        /// 行にカンマが存在する場合は、カンマの左側の単語（mfsr の置換単語リストCSVの1列目に相当）を検索単語とする
+        /// CSV標準形式（ダブルクォートでエスケープ）に対応
         /// </summary>
         /// <param name="lines">読み込んだ行のリスト</param>
         private void ParseAndStoreSearchWords(List<string> lines)
@@ -494,8 +496,58 @@ namespace mfprobe
 
             for (int i = 0; i < this._searchWordsCount; i++)
             {
-                this._searchWords[i] = lines[i];
+                string[] columns = ParseCsvLine(lines[i]);
+                this._searchWords[i] = columns[0];
             }
+        }
+
+        /// <summary>
+        /// CSV行を解析してフィールドの配列を返す
+        /// ダブルクォートで囲まれたフィールド内のカンマは区切り文字として扱わない
+        /// ダブルクォート内の連続した2つのダブルクォート("")は1つのダブルクォートとして扱う
+        /// </summary>
+        /// <param name="line">CSV行</param>
+        /// <returns>フィールドの配列</returns>
+        internal string[] ParseCsvLine(string line)
+        {
+            List<string> fields = new List<string>();
+            StringBuilder currentField = new StringBuilder();
+            bool inQuotes = false;
+
+            for (int i = 0; i < line.Length; i++)
+            {
+                char c = line[i];
+
+                if (c == '"')
+                {
+                    // 次の文字もダブルクォートの場合はエスケープされたダブルクォート
+                    if (inQuotes && i + 1 < line.Length && line[i + 1] == '"')
+                    {
+                        currentField.Append('"');
+                        i++; // 次のダブルクォートをスキップ
+                    }
+                    else
+                    {
+                        // クォートの開始または終了
+                        inQuotes = !inQuotes;
+                    }
+                }
+                else if (c == ',' && !inQuotes)
+                {
+                    // クォート外のカンマはフィールドの区切り
+                    fields.Add(currentField.ToString());
+                    currentField.Clear();
+                }
+                else
+                {
+                    currentField.Append(c);
+                }
+            }
+
+            // 最後のフィールドを追加
+            fields.Add(currentField.ToString());
+
+            return fields.ToArray();
         }
 
         /// <summary>
