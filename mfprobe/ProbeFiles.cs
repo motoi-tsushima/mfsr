@@ -453,13 +453,8 @@ namespace mfprobe
 
                             // スレッドセーフなコレクションへの追加
                             AddToOutputCollection(dispLine);
-
-                            wordFound = true;
                         }
-                    }
-                    else
-                    {
-                        // プローブ機能が無効の場合、検索結果のみ表示する
+
                         wordFound = true;
                     }
                 }

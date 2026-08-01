@@ -2,8 +2,8 @@
   "profiles": {
     "mfprobe": {
       "commandName": "Project",
-      "commandLineArgs": "*.txt /det:1",
-      "workingDirectory": "C:\\_test\\txprobe\\testOther"
+      "commandLineArgs": "/s:replist1.csv test1\\t*1.txt /d /p",
+      "workingDirectory": "C:\\_test\\mfsr\\test1\\BOM_utf-16"
     }
   }
 }
