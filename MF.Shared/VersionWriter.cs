@@ -1,4 +1,5 @@
 using System;
+using SnowStack.EncodingProbe;
 
 namespace MF.Shared
 {
@@ -16,15 +17,6 @@ namespace MF.Shared
         /// <param name="copyright">著作権表示</param>
         public static void WriteVersion(bool showLicense, string asmName, Version version, string copyright)
         {
-            string[] thirdParty = {
-                "This software includes the following third-party components:\n",
-                "UTF.Unknown",
-                "Copyright (c) 2018 Nikolay Pultsin",
-                "Licensed under MIT License",
-                "https://github.com/CharsetDetector/UTF-unknown",
-                ""
-            };
-
             Console.WriteLine("{0}  version {1}  {2}\n", asmName, version, copyright);
             Console.WriteLine("{0} is licensed under MIT License.", asmName);
             Console.WriteLine("https://github.com/motoi-tsushima/mfsr");
@@ -32,10 +24,7 @@ namespace MF.Shared
 
             if (showLicense)
             {
-                foreach (string s in thirdParty)
-                {
-                    Console.WriteLine(s);
-                }
+                Console.WriteLine(EncodingProbe.License);
             }
             else
             {

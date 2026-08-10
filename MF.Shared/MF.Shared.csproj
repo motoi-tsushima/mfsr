@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SnowStack.EncodingProbe" Version="1.0.0" />
+    <PackageReference Include="SnowStack.EncodingProbe" Version="1.0.2" />
     <PackageReference Include="UTF.Unknown" Version="2.6.0" />
   </ItemGroup>
 
