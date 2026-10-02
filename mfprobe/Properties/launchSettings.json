@@ -2,8 +2,8 @@
   "profiles": {
     "mfprobe": {
       "commandName": "Project",
-      "commandLineArgs": "/v",
-      "workingDirectory": "C:\\_test\\mfsr\\test1"
+      "commandLineArgs": "text1.txt -cul:ko",
+      "workingDirectory": "C:\\_test\\mfsr\\test_ko\\euc-kr\\test1"
     }
   }
 }

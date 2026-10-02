@@ -7,7 +7,7 @@ param(
     [string]$ApiKey
 )
 
-$version = "1.1.1"
+$version = "1.1.2"
 
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host " mfprobe / mfsr NuGet.org 公開 v$version" -ForegroundColor Cyan
